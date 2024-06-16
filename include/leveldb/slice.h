@@ -24,7 +24,7 @@
 
 namespace leveldb {
 
-class LEVELDB_EXPORT Slice {
+class LEVELDB_EXPORT Slice { // LEVELDB_EXPORT表示这个类应该在LevelDB的动态链接库中被导出，以便其他使用LevelDB的项目能够访问和使用它。
  public:
   // Create an empty slice.
   Slice() : data_(""), size_(0) {}
@@ -36,10 +36,11 @@ class LEVELDB_EXPORT Slice {
   Slice(const std::string& s) : data_(s.data()), size_(s.size()) {}
 
   // Create a slice that refers to s[0,strlen(s)-1]
-  Slice(const char* s) : data_(s), size_(strlen(s)) {}
+  Slice(const char* s) : data_(s), size_(strlen(s)) {} // 接收C风格的字符串
 
   // Intentionally copyable.
-  Slice(const Slice&) = default;
+  // Slice类使用了= default来指定默认的拷贝构造函数和拷贝赋值运算符。这告诉编译器使用默认实现，即浅拷贝。这对于Slice类是合适的，因为Slice只持有引用（指针）到外部数据，不需要深拷贝数据本身。
+  Slice(const Slice&) = default; // 拷贝构造函数
   Slice& operator=(const Slice&) = default;
 
   // Return a pointer to the beginning of the referenced data
@@ -53,7 +54,7 @@ class LEVELDB_EXPORT Slice {
 
   // Return the ith byte in the referenced data.
   // REQUIRES: n < size()
-  char operator[](size_t n) const {
+  char operator[](size_t n) const { // 声明方法为const, 这意味着它们不会修改Slice对象的状态
     assert(n < size());
     return data_[n];
   }
@@ -97,6 +98,7 @@ inline bool operator==(const Slice& x, const Slice& y) {
 
 inline bool operator!=(const Slice& x, const Slice& y) { return !(x == y); }
 
+// compare方法实现了三路比较，这是C++11引入的新特性，可以更直观地比较两个对象之间的关系，而不仅仅是相等或不相等。
 inline int Slice::compare(const Slice& b) const {
   const size_t min_len = (size_ < b.size_) ? size_ : b.size_;
   int r = memcmp(data_, b.data_, min_len);
